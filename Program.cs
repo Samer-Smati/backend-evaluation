@@ -6,12 +6,13 @@ using PfeProject.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>

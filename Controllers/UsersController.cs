@@ -11,12 +11,10 @@ namespace PfeProject.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public UsersController(UserManager<User> userManager, SignInManager<IdentityUser> signInManager)
+        public UsersController(UserManager<User> userManager)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
         }
 
         // Login
@@ -25,13 +23,15 @@ namespace PfeProject.Controllers
         {
             if (loginDto == null)
                 return BadRequest("Invalid client request");
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            if (user == null)
+                return NotFound();
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-            var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, isPersistent: false, lockoutOnFailure: false);
-
-            if (!result.Succeeded)
+            if (!result)
                 return Unauthorized("Invalid username or password.");
 
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+
             var roles = await _userManager.GetRolesAsync(user);
 
             var response = new LoginResponseDto
