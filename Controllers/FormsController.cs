@@ -26,7 +26,7 @@ namespace PfeProject.Controllers
 
             _context.FormConfigurations.Add(formConfig);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetForm), new { id = formConfig.Id }, formConfig);
+            return Ok(formConfig);
         }
 
         [HttpGet("{id}")]

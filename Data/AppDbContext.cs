@@ -100,6 +100,8 @@ namespace PfeProject.Data
             .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<FormConfiguration>()
            .HasKey(cm => cm.Id);
+            builder.Entity<FormField>()
+           .HasKey(cm => cm.Id);
             builder.Entity<FormConfiguration>()
            .HasMany(f => f.Fields)
            .WithOne()

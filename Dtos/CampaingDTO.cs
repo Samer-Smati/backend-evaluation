@@ -9,7 +9,7 @@
         public DateTime EndDate { get; set; }
         public string Type { get; set; }
         public string CreatedByUserId { get; set; }
-        public string CreatedByUserName { get; set; }
+        public string CreatedByUserName { get; set; } = string.Empty;
     }
 
     public class CampaignFilter

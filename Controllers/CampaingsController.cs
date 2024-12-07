@@ -173,7 +173,7 @@ namespace PfeProject.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok();
         }
 
         // DELETE: api/Campaigns/Unshare/{campaignId}
@@ -190,7 +190,7 @@ namespace PfeProject.Controllers
             _context.CampaignManagers.RemoveRange(sharesToRemove);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(); 
         }
 
         // GET: api/Campaigns/SharedWith/{managerId}
