@@ -8,7 +8,7 @@ using PfeProject.Models;
 
 namespace PfeProject.Controllers
 {
-    [Authorize]
+   
     [ApiController]
     [Route("api/[controller]")]
     public class GroupsController : ControllerBase

@@ -52,6 +52,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AllowAllOrigins");
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers(); 
+});
 
 app.Run();

@@ -27,12 +27,20 @@ namespace PfeProject.Data
             builder.Entity<IdentityRole>().HasData(
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "SIMPLEUSER" }
+                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
             );
-
+            builder.Entity<Group>(entity =>
+            {
+                entity.HasKey(e => e.Id);  
+            });
+            builder.Entity<Campaign>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+            });
             builder.Entity<EmployeeGroup>()
              .HasKey(oe => oe.Id);
-
+            builder.Entity<Campaign>()
+           .HasKey(cm => cm.Id);
             builder.Entity<EmployeeGroup>()
                 .HasOne(eg => eg.Group)
                 .WithMany(g => g.EmployeeGroups)
@@ -61,6 +69,10 @@ namespace PfeProject.Data
 
             builder.Entity<ObjectiveEmployee>()
            .HasKey(oe => oe.Id);
+            builder.Entity<ObjectiveEmployee>(entity =>
+            {
+                entity.HasKey(e => e.Id); 
+            });
 
             builder.Entity<ObjectiveEmployee>()
                 .HasOne(oe => oe.Objective)
@@ -86,7 +98,8 @@ namespace PfeProject.Data
             .WithMany()
             .HasForeignKey(cm => cm.ManagerId)
             .OnDelete(DeleteBehavior.Restrict);
-
+            builder.Entity<FormConfiguration>()
+           .HasKey(cm => cm.Id);
             builder.Entity<FormConfiguration>()
            .HasMany(f => f.Fields)
            .WithOne()

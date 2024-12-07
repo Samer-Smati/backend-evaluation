@@ -2,7 +2,7 @@
 {
     public class ObjectiveEmployee
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string ObjectiveId { get; set; }
         public Objective Objective { get; set; }
 

@@ -10,7 +10,7 @@ using System.Globalization;
 
 namespace PfeProject.Controllers
 {
-    [Authorize]
+  
     [ApiController]
     [Route("api/[controller]")]
     public class CampaignsController : ControllerBase
