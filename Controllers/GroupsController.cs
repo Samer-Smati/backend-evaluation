@@ -142,17 +142,24 @@ namespace PfeProject.Controllers
                 .ThenInclude(eg => eg.Employee)
                 .ToListAsync();
 
-            var groupDtos = groups.Select(g => new GroupDto
+            var groupDtos = groups.Select(group => new GroupObjectDto
             {
-                Id = g.Id,
-                Name = g.Name,
-                ManagerId = g.ManagerId,
-                ManagerName = g.Manager?.UserName??"",
-                EmployeeIds = g.EmployeeGroups.Select(eg => eg.EmployeeId).ToList()
+                Id = group.Id,
+                Name = group.Name,
+                ManagerId = group.ManagerId,
+                ManagerName = group.Manager?.FirstName + " " + group.Manager?.LastName ?? "N/A",
+                Employees = group.EmployeeGroups
+                    .Select(eg => new EmployeeDto
+                    {
+                        EmployeeId = eg.EmployeeId,
+                        EmployeeName = eg.Employee?.FirstName + " " + eg.Employee?.LastName
+                    })
+                    .ToList()
             }).ToList();
 
             return Ok(groupDtos);
         }
+
 
         // Filter Groups
         [HttpGet("filter")]
@@ -171,16 +178,23 @@ namespace PfeProject.Controllers
                 .ThenInclude(eg => eg.Employee)
                 .ToListAsync();
 
-            var groupDtos = groups.Select(g => new GroupDto
+            var groupDtos = groups.Select(group => new GroupObjectDto
             {
-                Id = g.Id,
-                Name = g.Name,
-                ManagerId = g.ManagerId,
-                ManagerName = g.Manager?.UserName??"",
-                EmployeeIds = g.EmployeeGroups.Select(eg => eg.EmployeeId).ToList()
+                Id = group.Id,
+                Name = group.Name,
+                ManagerId = group.ManagerId,
+                ManagerName = group.Manager?.FirstName + " " + group.Manager?.LastName ?? "N/A",
+                Employees = group.EmployeeGroups
+                    .Select(eg => new EmployeeDto
+                    {
+                        EmployeeId = eg.EmployeeId,
+                        EmployeeName = eg.Employee?.FirstName + " " + eg.Employee?.LastName
+                    })
+                    .ToList()
             }).ToList();
 
             return Ok(groupDtos);
         }
+
     }
 }
