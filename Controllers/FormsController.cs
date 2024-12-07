@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PfeProject.Data;
+using PfeProject.Dtos;
 using PfeProject.Models;
 
 namespace PfeProject.Controllers
@@ -38,15 +39,62 @@ namespace PfeProject.Controllers
             if (formConfig == null)
                 return NotFound();
 
-            return Ok(formConfig);
+            // Map to DTO
+            var formConfigDto = new FormConfigurationDto
+            {
+                Id = formConfig.Id,
+                Name = formConfig.Name,
+                CreatedByUserId = formConfig.CreatedByUserId,
+                Fields = formConfig.Fields
+                    .OrderBy(f => f.Order)
+                    .Select(field => new FormFieldDto
+                    {
+                        Id = field.Id,
+                        FieldType = field.FieldType,
+                        Label = field.Label,
+                        Value = field.Value,
+                        IsRequired = field.IsRequired,
+                        Placeholder = field.Placeholder,
+                        Order = field.Order
+                    })
+                    .ToList()
+            };
+
+            return Ok(formConfigDto);
         }
 
-        [HttpGet]
+
+        [HttpGet("all")]
         public async Task<IActionResult> GetAllForms()
         {
-            var forms = await _context.FormConfigurations.Include(f => f.Fields).ToListAsync();
-            return Ok(forms);
+            var forms = await _context.FormConfigurations
+                .Include(f => f.Fields)
+                .ToListAsync();
+
+            // Map to DTO
+            var formDtos = forms.Select(form => new FormConfigurationDto
+            {
+                Id = form.Id,
+                Name = form.Name,
+                CreatedByUserId = form.CreatedByUserId,
+                Fields = form.Fields
+                    .OrderBy(field => field.Order)
+                    .Select(field => new FormFieldDto
+                    {
+                        Id = field.Id,
+                        FieldType = field.FieldType,
+                        Label = field.Label,
+                        Value = field.Value,
+                        IsRequired = field.IsRequired,
+                        Placeholder = field.Placeholder,
+                        Order = field.Order
+                    })
+                    .ToList()
+            }).ToList();
+
+            return Ok(formDtos);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateForm(string id, [FromBody] FormConfiguration formConfig)
@@ -61,11 +109,47 @@ namespace PfeProject.Controllers
                 return NotFound();
 
             existingForm.Name = formConfig.Name;
-            existingForm.Fields = formConfig.Fields;
+
+            var existingFieldIds = existingForm.Fields.Select(f => f.Id).ToList();
+
+            foreach (var field in formConfig.Fields)
+            {
+                if (existingFieldIds.Contains(field.Id))
+                {
+                    
+                    var existingField = existingForm.Fields.First(f => f.Id == field.Id);
+                    existingField.FieldType = field.FieldType;
+                    existingField.Label = field.Label;
+                    existingField.Value = field.Value;
+                    existingField.IsRequired = field.IsRequired;
+                    existingField.Placeholder = field.Placeholder;
+                    existingField.Order = field.Order;
+                }
+                else
+                {
+                    // Add new field
+                    existingForm.Fields.Add(new FormField
+                    {
+                        Id = field.Id, // Make sure Id is set appropriately if required
+                        FieldType = field.FieldType,
+                        Label = field.Label,
+                        Value = field.Value,
+                        IsRequired = field.IsRequired,
+                        Placeholder = field.Placeholder,
+                        Order = field.Order
+                    });
+                }
+            }
+            var fieldsToRemove = existingForm.Fields.Where(f => !formConfig.Fields.Select(fc => fc.Id).Contains(f.Id)).ToList();
+            foreach (var field in fieldsToRemove)
+            {
+                _context.FormFields.Remove(field);
+            }
 
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteForm(int id)
@@ -90,8 +174,30 @@ namespace PfeProject.Controllers
             if (forms == null || !forms.Any())
                 return NotFound("No forms found for this user.");
 
-            return Ok(forms);
+            // Map to DTO
+            var formDtos = forms.Select(form => new FormConfigurationDto
+            {
+                Id = form.Id,
+                Name = form.Name,
+                CreatedByUserId = form.CreatedByUserId,
+                Fields = form.Fields
+                    .OrderBy(field => field.Order)
+                    .Select(field => new FormFieldDto
+                    {
+                        Id = field.Id,
+                        FieldType = field.FieldType,
+                        Label = field.Label,
+                        Value = field.Value,
+                        IsRequired = field.IsRequired,
+                        Placeholder = field.Placeholder,
+                        Order = field.Order
+                    })
+                    .ToList()
+            }).ToList();
+
+            return Ok(formDtos);
         }
+
     }
 
 }
