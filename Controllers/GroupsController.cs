@@ -54,11 +54,7 @@ namespace PfeProject.Controllers
                 return NotFound("Group not found.");
 
             group.Name = groupDto.Name;
-
-            // Find existing EmployeeGroups
             var existingEmployeeGroups = group.EmployeeGroups.ToList();
-
-            // Remove EmployeeGroups that are no longer in the updated list
             var employeeGroupsToRemove = existingEmployeeGroups
                 .Where(eg => !groupDto.EmployeeIds.Contains(eg.EmployeeId))
                 .ToList();
@@ -69,7 +65,6 @@ namespace PfeProject.Controllers
                 _context.EmployeeGroups.Remove(employeeGroup);
             }
 
-            // Add new EmployeeGroups that are not already in the database
             if (groupDto.EmployeeIds != null && groupDto.EmployeeIds.Any())
             {
                 var employeeGroupsToAdd = groupDto.EmployeeIds
