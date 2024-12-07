@@ -62,7 +62,7 @@ namespace PfeProject.Controllers
 
         // Delete a Group
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteGroup(int id)
+        public async Task<IActionResult> DeleteGroup(string id)
         {
             var group = await _context.Groups.FindAsync(id);
             if (group == null)
@@ -71,6 +71,16 @@ namespace PfeProject.Controllers
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
             return Ok();
+        }
+
+        // Get Group by id
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var group = await _context.Groups.FindAsync(id);
+            if (group == null)
+                return NotFound("Group not found.");
+            return Ok(group);
         }
 
         // Get All Groups
