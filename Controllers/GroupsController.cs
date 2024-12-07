@@ -46,19 +46,50 @@ namespace PfeProject.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateGroup(string id, [FromBody] GroupDto groupDto)
         {
-            var group = await _context.Groups.Include(g => g.EmployeeGroups).FirstOrDefaultAsync(g => g.Id == id);
+            var group = await _context.Groups
+                .Include(g => g.EmployeeGroups)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
             if (group == null)
                 return NotFound("Group not found.");
 
             group.Name = groupDto.Name;
 
-            // Update employees
-            group.EmployeeGroups.Clear();
-            group.EmployeeGroups = groupDto.EmployeeIds.Select(empId => new EmployeeGroup { GroupId = id, EmployeeId = empId }).ToList();
+            // Find existing EmployeeGroups
+            var existingEmployeeGroups = group.EmployeeGroups.ToList();
 
+            // Remove EmployeeGroups that are no longer in the updated list
+            var employeeGroupsToRemove = existingEmployeeGroups
+                .Where(eg => !groupDto.EmployeeIds.Contains(eg.EmployeeId))
+                .ToList();
+
+            foreach (var employeeGroup in employeeGroupsToRemove)
+            {
+                group.EmployeeGroups.Remove(employeeGroup);
+                _context.EmployeeGroups.Remove(employeeGroup);
+            }
+
+            // Add new EmployeeGroups that are not already in the database
+            if (groupDto.EmployeeIds != null && groupDto.EmployeeIds.Any())
+            {
+                var employeeGroupsToAdd = groupDto.EmployeeIds
+                    .Where(empId => !existingEmployeeGroups.Any(eg => eg.EmployeeId == empId))
+                    .Select(empId => new EmployeeGroup { GroupId = id, EmployeeId = empId })
+                    .ToList();
+
+                foreach (var employeeGroup in employeeGroupsToAdd)
+                {
+                    group.EmployeeGroups.Add(employeeGroup);
+                }
+            }
+
+
+            _context.Groups.Update(group);
             await _context.SaveChangesAsync();
+
             return Ok();
         }
+
 
         // Delete a Group
         [HttpDelete("delete/{id}")]
@@ -77,10 +108,33 @@ namespace PfeProject.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var group = await _context.Groups.FindAsync(id);
+            var group = await _context.Groups
+                .Include(g => g.Manager)
+                .Include(g => g.EmployeeGroups)
+                .ThenInclude(eg => eg.Employee)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+
             if (group == null)
                 return NotFound("Group not found.");
-            return Ok(group);
+
+            // Map to DTO
+            var groupDto = new GroupObjectDto
+            {
+                Id = group.Id,
+                Name = group.Name,
+                ManagerId = group.ManagerId,
+                ManagerName = group.Manager?.FirstName+" "+group.Manager?.LastName ?? "N/A",
+                Employees = group.EmployeeGroups
+                    .Select(eg => new EmployeeDto
+                    {
+                        EmployeeId = eg.EmployeeId,
+                        EmployeeName = eg.Employee?.FirstName +" "+ eg.Employee?.LastName
+                    })
+                    .ToList()
+            };
+
+            return Ok(groupDto);
         }
 
         // Get All Groups

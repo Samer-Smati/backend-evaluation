@@ -9,4 +9,20 @@
         public List<string> EmployeeIds { get; set; } = new List<string>();
     }
 
+    public class GroupObjectDto
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string ManagerId { get; set; }
+        public string ManagerName { get; set; } // If you want the manager's name
+        public List<EmployeeDto> Employees { get; set; }
+    }
+
+    public class EmployeeDto
+    {
+        public string EmployeeId { get; set; }
+        public string EmployeeName { get; set; } // Example: Add more properties if needed
+    }
+
+
 }
