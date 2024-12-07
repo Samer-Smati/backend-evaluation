@@ -60,9 +60,10 @@ namespace PfeProject.Controllers
 
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, userDto.Role);
+                await _userManager.AddToRoleAsync(user, userDto.Role.ToUpper());
                 return Ok(new { Message = "User created successfully", UserId = user.Id });
             }
+
 
             return BadRequest(result.Errors);
         }
@@ -85,7 +86,7 @@ namespace PfeProject.Controllers
                 return BadRequest(result.Errors);
 
             // Update user role if specified
-            if (!string.IsNullOrEmpty(userDto.Role))
+            if (!string.IsNullOrEmpty(userDto.Role.ToUpper()))
             {
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 var roleUpdateResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
@@ -93,7 +94,7 @@ namespace PfeProject.Controllers
                 if (!roleUpdateResult.Succeeded)
                     return BadRequest(roleUpdateResult.Errors);
 
-                var addRoleResult = await _userManager.AddToRoleAsync(user, userDto.Role);
+                var addRoleResult = await _userManager.AddToRoleAsync(user, userDto.Role.ToUpper());
                 if (!addRoleResult.Succeeded)
                     return BadRequest(addRoleResult.Errors);
             }
