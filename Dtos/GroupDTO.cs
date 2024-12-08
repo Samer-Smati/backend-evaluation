@@ -24,5 +24,11 @@
         public string EmployeeName { get; set; } // Example: Add more properties if needed
     }
 
+    public class UserCampaingDto
+    {
+        public string Id { get; set; }
+        public string Name { get; set; } // Example: Add more properties if needed
+    }
+
 
 }

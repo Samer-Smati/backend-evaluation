@@ -10,6 +10,7 @@
         public string Type { get; set; }
         public string CreatedByUserId { get; set; }
         public string CreatedByUserName { get; set; } = string.Empty;
+        public List<UserCampaingDto> Managers { get; set; }
     }
 
     public class CampaignFilter
@@ -35,6 +36,8 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string CreatedBy { get; set; }
+
+        public List<UserCampaingDto> Managers { get; set; }
     }
 
     public class ReportDTO

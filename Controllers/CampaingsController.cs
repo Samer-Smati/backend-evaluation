@@ -90,6 +90,7 @@ namespace PfeProject.Controllers
         {
             var campaigns = await _context.Campaigns
                 .Include(c => c.CreatedByUser)
+                .Include(c=>c.CampaignManagers)
                 .ToListAsync();
 
             var campaignDtos = campaigns.Select(c => new CampaignDto
@@ -101,7 +102,14 @@ namespace PfeProject.Controllers
                 EndDate = c.EndDate,
                 Type = c.Type,
                 CreatedByUserId = c.CreatedByUserId,
-                CreatedByUserName = c.CreatedByUser?.UserName??""
+                CreatedByUserName = c.CreatedByUser?.UserName??"",
+                Managers = c.CampaignManagers
+                    .Select(eg => new UserCampaingDto
+                    {
+                        Id = eg.ManagerId,
+                        Name = eg.Manager?.FirstName + " " + eg.Manager?.LastName
+                    })
+                    .ToList()
             }).ToList();
 
             return Ok(campaignDtos);
@@ -143,7 +151,14 @@ namespace PfeProject.Controllers
                 EndDate = c.EndDate,
                 Type = c.Type,
                 CreatedByUserId = c.CreatedByUserId,
-                CreatedByUserName = c.CreatedByUser.UserName
+                CreatedByUserName = c.CreatedByUser.UserName,
+                Managers = c.CampaignManagers
+                    .Select(eg => new UserCampaingDto
+                    {
+                        Id = eg.ManagerId,
+                        Name = eg.Manager?.FirstName + " " + eg.Manager?.LastName
+                    })
+                    .ToList()
             }).ToList();
 
             return Ok(campaignDtos);
@@ -210,7 +225,14 @@ namespace PfeProject.Controllers
                 Description = c.Description,
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
-                CreatedBy = c.CreatedByUser.UserName??""
+                CreatedBy = c.CreatedByUser.UserName??"",
+                Managers = c.CampaignManagers
+                    .Select(eg => new UserCampaingDto
+                    {
+                        Id = eg.ManagerId,
+                        Name = eg.Manager?.FirstName + " " + eg.Manager?.LastName
+                    })
+                    .ToList()
             }).ToList();
 
             return Ok(result);
