@@ -17,6 +17,7 @@ namespace PfeProject.Data
         public DbSet<CampaignManager> CampaignManagers { get; set; }
         public DbSet<FormConfiguration> FormConfigurations { get; set; }
         public DbSet<FormField> FormFields { get; set; }
+        public DbSet<Event> Events { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -119,6 +120,21 @@ namespace PfeProject.Data
              .WithMany()
              .HasForeignKey(f => f.CreatedByUserId)
              .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Event>()
+            .HasKey(e => e.Id);
+
+            builder.Entity<Event>()
+                .HasOne(e => e.Manager)
+                .WithMany()
+                .HasForeignKey(e => e.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Event>()
+                .HasOne(e => e.Employee)
+                .WithMany()
+                .HasForeignKey(e => e.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
