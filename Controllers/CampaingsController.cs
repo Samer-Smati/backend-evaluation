@@ -52,7 +52,7 @@ namespace PfeProject.Controllers
 
         // Update Campaign
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateCampaign(int id, [FromBody] CampaignDto campaignDto)
+        public async Task<IActionResult> UpdateCampaign(string id, [FromBody] CampaignDto campaignDto)
         {
             var campaign = await _context.Campaigns.FindAsync(id);
             if (campaign == null)
@@ -73,7 +73,7 @@ namespace PfeProject.Controllers
 
         // Delete Campaign
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteCampaign(int id)
+        public async Task<IActionResult> DeleteCampaign(string id)
         {
             var campaign = await _context.Campaigns.FindAsync(id);
             if (campaign == null)
