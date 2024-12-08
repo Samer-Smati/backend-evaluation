@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Bogus;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,35 @@ namespace PfeProject.Controllers
         {
             _context = context;
             _userManager = userManager;
+        }
+
+        [HttpPost("seed-fake-campaigns")]
+        public async Task<IActionResult> SeedFakeCampaigns()
+        {
+            var validUserIds = await _userManager.Users
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            if (!validUserIds.Any())
+                return BadRequest("No valid Manager or HR users found to assign campaigns.");
+
+            // Generate 100 fake campaigns
+            var fakeCampaigns = new List<Campaign>();
+            var faker = new Faker<Campaign>()
+                .RuleFor(c => c.Name, f => f.Lorem.Sentence(3))
+                .RuleFor(c => c.Description, f => f.Lorem.Paragraph())
+                .RuleFor(c => c.StartDate, f => f.Date.Between(DateTime.Now.AddMonths(-12), DateTime.Now.AddMonths(12)))
+                .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(1, 6)))
+                .RuleFor(c => c.Type, f => f.PickRandom(new[] { "Trimestrial", "Annual", "Weekly" }))
+                .RuleFor(c => c.CreatedByUserId, f => f.PickRandom(validUserIds));
+
+            fakeCampaigns = faker.Generate(100);
+
+            // Add campaigns to the database
+            await _context.Campaigns.AddRangeAsync(fakeCampaigns);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "100 fake campaigns seeded successfully!" });
         }
 
         // Create Campaign

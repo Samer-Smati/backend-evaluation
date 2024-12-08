@@ -166,22 +166,15 @@ namespace PfeProject.Controllers
         public async Task<IActionResult> Filter([FromQuery] string? username, [FromQuery] string? email, [FromQuery] string? role)
         {
             var query = _userManager.Users.AsQueryable();
-
-            // Filter by username
             if (!string.IsNullOrEmpty(username))
                 query = query.Where(u => u.UserName.Contains(username));
-
-            // Filter by email
             if (!string.IsNullOrEmpty(email))
                 query = query.Where(u => u.Email.Contains(email));
-
-            // Filter by role
-            if (!string.IsNullOrEmpty(role))
+            if (!string.IsNullOrEmpty(role.ToUpper()))
             {
-                // Get user IDs for users in the role
+             
                 var roleUsers = await _userManager.GetUsersInRoleAsync(role);
                 var roleUserIds = roleUsers.Select(u => u.Id).ToList();
-
                 query = query.Where(u => roleUserIds.Contains(u.Id));
             }
 
