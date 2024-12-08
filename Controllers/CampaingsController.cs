@@ -151,8 +151,8 @@ namespace PfeProject.Controllers
                 EndDate = c.EndDate,
                 Type = c.Type,
                 CreatedByUserId = c.CreatedByUserId,
-                CreatedByUserName = c.CreatedByUser.UserName,
-                Managers = c.CampaignManagers
+                CreatedByUserName = c.CreatedByUser?.UserName??"",
+                Managers = c.CampaignManagers?
                     .Select(eg => new UserCampaingDto
                     {
                         Id = eg.ManagerId,
