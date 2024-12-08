@@ -149,15 +149,14 @@ public class ReportsController : ControllerBase
                 .GroupBy(c => new { Year = c.CreatedDate.Year, Month = c.CreatedDate.Month })
                 .Select(g => new
                 {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
+                    Date = g.Key.Year+"-"+ g.Key.Month,
                     Count = g.Count()
                 }),
             "year" => campaigns
                 .GroupBy(c => c.CreatedDate.Year)
                 .Select(g => new
                 {
-                    Year = g.Key,
+                    Date = g.Key,
                     Count = g.Count()
                 }),
             _ => Enumerable.Empty<object>(),
