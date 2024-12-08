@@ -9,6 +9,7 @@ namespace PfeProject.Dtos
         public DateTime StartDate { get; set; }
         public DateTime DueDate { get; set; }
         public string CampaignId { get; set; }
+        public string CreatedByManagerId { get; set; }
         public List<string> EmployeeIds { get; set; }
         public ObjectiveStatus Status { get; set; }
     }

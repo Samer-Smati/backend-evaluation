@@ -53,7 +53,7 @@ namespace PfeProject.Data
                 .HasForeignKey(eg => eg.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<Objective>()
-        .HasKey(o => o.Id);
+                .HasKey(o => o.Id);
 
             builder.Entity<Objective>()
                 .HasOne(o => o.Campaign) 

@@ -37,13 +37,14 @@ namespace PfeProject.Controllers
                 StartDate = dto.StartDate,
                 DueDate = dto.DueDate,
                 CampaignId = dto.CampaignId,
+                CreatedByManagerId = dto.CreatedByManagerId,
                 Employees = dto.EmployeeIds.Select(id => new ObjectiveEmployee { EmployeeId = id }).ToList()
             };
 
             _context.Objectives.Add(objective);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetObjectiveById), new { id = objective.Id }, objective);
+            return Ok(objective.Id);
         }
 
         // GET: api/Objectives
@@ -126,6 +127,7 @@ namespace PfeProject.Controllers
             objective.StartDate = dto.StartDate;
             objective.DueDate = dto.DueDate;
             objective.CampaignId = dto.CampaignId;
+            objective.CreatedByManagerId = dto.CreatedByManagerId;
             objective.Status = ObjectiveStatus.New;
             // Update Employees
             objective.Employees.Clear();
