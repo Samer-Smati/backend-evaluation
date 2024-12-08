@@ -270,7 +270,7 @@ namespace PfeProject.Controllers
                 Employees = o.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
-                    Name = e.Employee.UserName
+                    Name = e.Employee?.UserName??""
                 }).ToList() ?? []
             }).ToList();
 

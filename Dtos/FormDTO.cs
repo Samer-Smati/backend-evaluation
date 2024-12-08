@@ -17,6 +17,15 @@
         public bool IsRequired { get; set; }
         public string Placeholder { get; set; }
         public int Order { get; set; }
+        public List<FormFieldOptionDto> Options { get; set; } = new List<FormFieldOptionDto>(); // Added support for options
     }
+
+    public class FormFieldOptionDto
+    {
+        public string Label { get; set; }
+        public string Value { get; set; }
+        public string Name { get; set; }
+    }
+
 
 }
