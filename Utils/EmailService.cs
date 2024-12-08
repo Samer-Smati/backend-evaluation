@@ -13,7 +13,7 @@ namespace PfeProject.Utils
             var senderEmail = config["EmailSettings:Email"];
             var senderPassword = config["EmailSettings:Password"];
             var email = new MimeMessage();
-            email.From.Add(new MailboxAddress("Your Name", "your-email@gmail.com"));
+            email.From.Add(new MailboxAddress("Team Project", senderEmail));
             email.To.Add(new MailboxAddress("", recipientEmail));
             email.Subject = subject;
 
@@ -25,7 +25,7 @@ namespace PfeProject.Utils
             using var smtp = new SmtpClient();
             try
             {
-                await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                await smtp.ConnectAsync("smtp.fastmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
                 await smtp.AuthenticateAsync(senderEmail, senderPassword);
                 await smtp.SendAsync(email);
             }

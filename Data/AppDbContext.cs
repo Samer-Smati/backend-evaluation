@@ -18,6 +18,7 @@ namespace PfeProject.Data
         public DbSet<FormConfiguration> FormConfigurations { get; set; }
         public DbSet<FormField> FormFields { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Report> Reports { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -25,11 +26,20 @@ namespace PfeProject.Data
         {
             base.OnModelCreating(builder);
 
-            /*builder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
-            );*/
+            var roles = new[]
+                {
+                    new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
+                    new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
+                    new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
+                };
+
+                foreach (var role in roles)
+                {
+                    if (!builder.Model.GetEntityTypes().Any(e => e.ClrType == typeof(IdentityRole) && e.GetProperties().Any(p => p.Name == "Name" && p.GetValue(role)?.ToString() == role.Name)))
+                    {
+                        builder.Entity<IdentityRole>().HasData(role);
+                    }
+                }
             builder.Entity<Group>(entity =>
             {
                 entity.HasKey(e => e.Id);  
@@ -135,6 +145,12 @@ namespace PfeProject.Data
                 .WithMany()
                 .HasForeignKey(e => e.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Report>()
+              .HasOne(o => o.CreatedBy)
+              .WithMany()
+              .HasForeignKey(o => o.CreatedById)
+              .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

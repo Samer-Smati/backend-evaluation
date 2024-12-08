@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PfeProject.Dtos;
 using PfeProject.Models;
+using PfeProject.Utils;
 
 namespace PfeProject.Controllers
 {
@@ -137,7 +138,14 @@ namespace PfeProject.Controllers
             });
         }
 
-
+        // Get All Users
+        [HttpGet("send-email")]
+        public async Task<IActionResult> SendEmail()
+        {
+            EmailService emailService = new EmailService();
+            await emailService.SendEmailAsync("alaa.boukchina@gmail.com","test","test");
+            return Ok(true);
+        }
         // Get All Users
         [HttpGet("getall")]
         public async Task<IActionResult> GetAll()
