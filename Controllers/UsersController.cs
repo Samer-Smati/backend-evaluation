@@ -178,7 +178,7 @@ namespace PfeProject.Controllers
                 query = query.Where(u => u.UserName.Contains(username));
             if (!string.IsNullOrEmpty(email))
                 query = query.Where(u => u.Email.Contains(email));
-            if (!string.IsNullOrEmpty(role.ToUpper()))
+            if (!string.IsNullOrEmpty(role))
             {
              
                 var roleUsers = await _userManager.GetUsersInRoleAsync(role);
