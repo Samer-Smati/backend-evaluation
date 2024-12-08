@@ -141,7 +141,7 @@ namespace PfeProject.Controllers
 
         // DELETE: api/Objectives/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteObjective(int id)
+        public async Task<IActionResult> DeleteObjective(string id)
         {
             var objective = await _context.Objectives.FindAsync(id);
             if (objective == null) return NotFound("Objective not found.");
@@ -277,7 +277,7 @@ namespace PfeProject.Controllers
         }
 
         [HttpPut("{id}/MarkAsDone")]
-        public async Task<IActionResult> MarkObjectiveAsDone(int id)
+        public async Task<IActionResult> MarkObjectiveAsDone(string id)
         {
             var objective = await _context.Objectives.FindAsync(id);
             if (objective == null) return NotFound("Objective not found.");
