@@ -285,7 +285,7 @@ namespace PfeProject.Controllers
             // Update the status and set the end date
             objective.Status = ObjectiveStatus.Done;
             objective.EndDate = DateTime.UtcNow; // or any other logic for setting the end date
-
+            _context.Objectives.Update(objective);
             await _context.SaveChangesAsync();
             return NoContent();
         }
