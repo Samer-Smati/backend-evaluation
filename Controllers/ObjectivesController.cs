@@ -64,12 +64,13 @@ namespace PfeProject.Controllers
                 Description = o.Description,
                 StartDate = o.StartDate,
                 DueDate = o.DueDate,
-                CampaignName = o.Campaign.Name,
-                Employees = o.Employees.Select(e => new EmployeeDTO
+                CampaignName = o.Campaign?.Name??"",
+                Status = o.Status,
+                Employees = o.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
                     Name = e.Employee.UserName
-                }).ToList()
+                }).ToList() ?? []
             }).ToList();
 
             return Ok(result);
@@ -95,13 +96,13 @@ namespace PfeProject.Controllers
                 StartDate = objective.StartDate,
                 EndDate = objective.EndDate,
                 DueDate = objective.DueDate,
-                CampaignName = objective.Campaign.Name,
+                CampaignName = objective.Campaign?.Name??"",
                 Status = objective.Status,
-                Employees = objective.Employees.Select(e => new EmployeeDTO
+                Employees = objective.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
                     Name = e.Employee.UserName
-                }).ToList()
+                }).ToList() ?? []
             };
 
             return Ok(result);
@@ -171,13 +172,13 @@ namespace PfeProject.Controllers
                 StartDate = o.StartDate,
                 EndDate = o.EndDate,
                 DueDate = o.DueDate,
-                CampaignName = o.Campaign.Name,
+                CampaignName = o.Campaign?.Name??"",
                 Status = o.Status,
-                Employees = o.Employees.Select(e => new EmployeeDTO
+                Employees = o.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
-                    Name = e.Employee.UserName
-                }).ToList()
+                    Name = e.Employee?.UserName??""
+                }).ToList() ?? []
             }).ToList();
 
             return Ok(result);
@@ -202,13 +203,13 @@ namespace PfeProject.Controllers
                 StartDate = o.StartDate,
                 EndDate = o.EndDate,
                 DueDate = o.DueDate,
-                CampaignName = o.Campaign.Name,
+                CampaignName = o.Campaign?.Name??"",
                 Status = o.Status,
-                Employees = o.Employees.Select(e => new EmployeeDTO
+                Employees = o.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
-                    Name = e.Employee.UserName
-                }).ToList()
+                    Name = e.Employee?.UserName
+                }).ToList() ?? []
             }).ToList();
 
             return Ok(result);
@@ -233,13 +234,13 @@ namespace PfeProject.Controllers
                 StartDate = o.StartDate,
                 EndDate = o.EndDate,
                 DueDate = o.DueDate,
-                CampaignName = o.Campaign.Name,
+                CampaignName = o.Campaign?.Name??"",
                 Status= o.Status,
-                Employees = o.Employees.Select(e => new EmployeeDTO
+                Employees = o.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
                     Name = e.Employee.UserName
-                }).ToList()
+                }).ToList() ?? []
             }).ToList();
 
             return Ok(result);
@@ -264,13 +265,13 @@ namespace PfeProject.Controllers
                 StartDate = o.StartDate,
                 EndDate = o.EndDate,
                 DueDate = o.DueDate,
-                CampaignName = o.Campaign.Name,
+                CampaignName = o.Campaign?.Name??"",
                 Status = o.Status,
-                Employees = o.Employees.Select(e => new EmployeeDTO
+                Employees = o.Employees?.Select(e => new EmployeeDTO
                 {
                     EmployeeId = e.EmployeeId,
                     Name = e.Employee.UserName
-                }).ToList()
+                }).ToList() ?? []
             }).ToList();
 
             return Ok(result);
@@ -281,10 +282,8 @@ namespace PfeProject.Controllers
         {
             var objective = await _context.Objectives.FindAsync(id);
             if (objective == null) return NotFound("Objective not found.");
-
-            // Update the status and set the end date
             objective.Status = ObjectiveStatus.Done;
-            objective.EndDate = DateTime.UtcNow; // or any other logic for setting the end date
+            objective.EndDate = DateTime.UtcNow; 
             _context.Objectives.Update(objective);
             await _context.SaveChangesAsync();
             return NoContent();
