@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Fpe;
 using PfeProject.Data;
 using PfeProject.Dtos;
 using PfeProject.Models;
@@ -197,7 +198,7 @@ namespace PfeProject.Controllers
 
         [HttpPost("Share")]
         public async Task<IActionResult> ShareCampaign([FromBody] ShareCampaignDTO dto)
-        {
+        {   EmailService emailService = new EmailService();
             var campaign = await _context.Campaigns.FindAsync(dto.CampaignId);
             if (campaign == null) return NotFound("Campaign not found.");
 
@@ -216,6 +217,20 @@ namespace PfeProject.Controllers
                     ManagerId = managerId
                 };
                 _context.CampaignManagers.Add(campaignManager);
+                var manager = await _context.Users.FindAsync(managerId);
+                if (manager != null)
+                {
+                    try
+                    {
+                        var subject = "New Campaign Shared with You";
+                        var body = $"Hello {manager.FirstName+" "+manager.LastName},\n\nA new campaign has been shared with you. Please check your dashboard for details.\n\nBest regards,\nYour Team";
+                        await emailService.SendEmailAsync(manager.Email??"", subject, body);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error sending email to manager {managerId}: {ex.Message}");
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();

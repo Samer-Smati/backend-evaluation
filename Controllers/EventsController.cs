@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PfeProject.Data;
 using PfeProject.Dtos;
 using PfeProject.Models;
+using PfeProject.Utils;
 
 namespace PfeProject.Controllers
 {
@@ -32,6 +33,38 @@ namespace PfeProject.Controllers
 
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
+            try
+            {
+                EmailService emailService = new EmailService();
+                var employee = await _context.Users.FindAsync(dto.EmployeeId);
+
+                if (employee != null)
+                {
+                    try
+                    {
+                        var subject = "New Event Invitation";
+                        var body = $"Hello {employee.FirstName},\n\nYou have been invited to a new event:\n\n" +
+                                   $"Title: {newEvent.Title}\n" +
+                                   $"Start Date: {newEvent.StartDate.ToShortDateString()}\n" +
+                                   $"End Date: {newEvent.EndDate.ToShortDateString()}\n" +
+                                   $"Created by: Manager (ID: {newEvent.ManagerId})\n\n" +
+                                   "Please check your calendar for details.\n\n" +
+                                   "Best regards,\nYour Team";
+
+                        // Send email to the employee
+                        await emailService.SendEmailAsync(employee.Email ?? "", subject, body);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error or handle it appropriately
+                        Console.WriteLine($"Error sending email to employee {dto.EmployeeId}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
             return Ok(newEvent);
         }
 

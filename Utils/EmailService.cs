@@ -25,7 +25,7 @@ namespace PfeProject.Utils
             using var smtp = new SmtpClient();
             try
             {
-                await smtp.ConnectAsync("smtp.fastmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
                 await smtp.AuthenticateAsync(senderEmail, senderPassword);
                 await smtp.SendAsync(email);
             }
@@ -39,4 +39,6 @@ namespace PfeProject.Utils
             }
         }
     }
+
+
 }

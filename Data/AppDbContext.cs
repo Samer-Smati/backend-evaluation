@@ -26,11 +26,29 @@ namespace PfeProject.Data
         {
             base.OnModelCreating(builder);
 
-            /*builder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
-                new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
-            );*/
+            var roleManager = new RoleManager<IdentityRole>(
+                new RoleStore<IdentityRole>(this),
+                null,
+                null,
+                null,
+                null);
+
+            var roles = new[]
+            {
+        new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
+        new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
+        new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
+    };
+
+            foreach (var role in roles)
+            {
+                // Check if the role exists in the database
+                if (!roleManager.RoleExistsAsync(role.Name).Result)
+                {
+                    builder.Entity<IdentityRole>().HasData(role);
+                }
+            }
+
             builder.Entity<Group>(entity =>
             {
                 entity.HasKey(e => e.Id);  

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PfeProject.Data;
 using PfeProject.Dtos;
 using PfeProject.Models;
+using PfeProject.Utils;
 
 namespace PfeProject.Controllers
 {
@@ -22,6 +23,7 @@ namespace PfeProject.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateObjective([FromBody] CreateObjectiveDTO dto)
         {
+            EmailService emailService = new EmailService(); 
             // Validate Campaign
             var campaign = await _context.Campaigns.FindAsync(dto.CampaignId);
             if (campaign == null) return NotFound("Campaign not found.");
@@ -43,6 +45,39 @@ namespace PfeProject.Controllers
 
             _context.Objectives.Add(objective);
             await _context.SaveChangesAsync();
+
+            try
+            {
+                foreach (var employeeId in dto.EmployeeIds)
+                {
+                    var employee = await _context.Users.FindAsync(employeeId);
+                    if (employee != null)
+                    {
+                        try
+                        {
+                            var subject = "New Objective Assigned to You";
+                            var body = $"Hello {employee.FirstName},\n\nA new objective has been assigned to you:\n\n" +
+                                       $"Title: {objective.Title}\n" +
+                                       $"Description: {objective.Description}\n" +
+                                       $"Start Date: {objective.StartDate.ToShortDateString()}\n" +
+                                       $"Due Date: {objective.DueDate.ToShortDateString()}\n\n" +
+                                       "Best regards,\nYour Team";
+
+                            // Send email to the employee
+                            await emailService.SendEmailAsync(employee.Email ?? "", subject, body);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the error or handle it appropriately
+                            Console.WriteLine($"Error sending email to employee {employeeId}: {ex.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+            }
 
             return Ok(objective.Id);
         }
