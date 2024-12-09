@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Bogus;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PfeProject.Dtos;
@@ -12,10 +13,52 @@ namespace PfeProject.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
-
-        public UsersController(UserManager<User> userManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public UsersController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        [HttpPost("seed-fake-users")]
+        public async Task<IActionResult> SeedFakeUsers()
+        {
+            // Define roles to assign
+            var roles = new[] { "Manager", "HR", "Employee" };
+
+            // Validate roles exist
+            foreach (var role in roles)
+            {
+                if (!await _roleManager.RoleExistsAsync(role))
+                    return BadRequest($"Role '{role}' does not exist.");
+            }
+
+            // Use Bogus to generate fake user data
+            var faker = new Faker<User>()
+                .RuleFor(u => u.UserName, f => f.Internet.UserName())
+                .RuleFor(u => u.Email, f => f.Internet.Email())
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LastName, f => f.Name.LastName());
+
+            // Generate fake users
+            var fakeUsers = faker.Generate(100); // Generate 100 fake users
+
+            foreach (var fakeUser in fakeUsers)
+            {
+                // Use a fixed password for all users
+                const string defaultPassword = "Azerty1+2+3+4";
+
+                // Create user
+                var result = await _userManager.CreateAsync(fakeUser, defaultPassword);
+                if (result.Succeeded)
+                {
+                    // Randomly assign a role to the user
+                    var role = new Faker().PickRandom(roles);
+                    await _userManager.AddToRoleAsync(fakeUser, role);
+                }
+            }
+
+            return Ok(new { Message = "100 fake users seeded successfully!" });
         }
 
         // Login

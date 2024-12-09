@@ -19,42 +19,91 @@ namespace PfeProject.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public CampaignsController(AppDbContext context, UserManager<User> userManager)
+        public CampaignsController(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
-        [HttpPost("seed-fake-campaigns")]
-        public async Task<IActionResult> SeedFakeCampaigns()
+        [HttpPost("seed-fake-campaigns-and-objectives")]
+        public async Task<IActionResult> SeedFakeCampaignsAndObjectives()
         {
-            var validUserIds = await _userManager.Users
-                .Select(u => u.Id)
-                .ToListAsync();
+            // Retrieve users by roles
+            var managerUsers = await _userManager.GetUsersInRoleAsync("Manager");
+            var employeeUsers = await _userManager.GetUsersInRoleAsync("Employee");
 
-            if (!validUserIds.Any())
-                return BadRequest("No valid Manager or HR users found to assign campaigns.");
+            if (!managerUsers.Any() || !employeeUsers.Any())
+            {
+                return BadRequest("No valid Manager or Employee users found.");
+            }
 
-            // Generate 100 fake campaigns
-            var fakeCampaigns = new List<Campaign>();
-            var faker = new Faker<Campaign>()
+            var managerIds = managerUsers.Select(u => u.Id).ToList();
+            var employeeIds = employeeUsers.Select(u => u.Id).ToList();
+
+            // Seed campaigns
+            var campaignFaker = new Faker<Campaign>()
                 .RuleFor(c => c.Name, f => f.Lorem.Sentence(3))
                 .RuleFor(c => c.Description, f => f.Lorem.Paragraph())
-                .RuleFor(c => c.StartDate, f => f.Date.Between(DateTime.Now.AddMonths(-12), DateTime.Now.AddMonths(12)))
+                .RuleFor(c => c.StartDate, f => f.Date.Between(DateTime.Now.AddYears(-3), DateTime.Now.AddYears(1)))
                 .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(1, 6)))
                 .RuleFor(c => c.Type, f => f.PickRandom(new[] { "Trimestrial", "Annual", "Weekly" }))
-                .RuleFor(c => c.CreatedByUserId, f => f.PickRandom(validUserIds))
-                .RuleFor(c => c.CreatedDate, f => f.Date.Between(DateTime.Now.AddMonths(-24), DateTime.Now));
+                .RuleFor(c => c.CreatedByUserId, f => f.PickRandom(managerIds))
+                .RuleFor(c => c.CreatedDate, f => f.Date.Between(DateTime.Now.AddYears(-3), DateTime.Now));
 
-            fakeCampaigns = faker.Generate(100);
-
-            // Add campaigns to the database
+            var fakeCampaigns = campaignFaker.Generate(200);
             await _context.Campaigns.AddRangeAsync(fakeCampaigns);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "100 fake campaigns seeded successfully!" });
+            // Get the saved campaigns
+            var savedCampaigns = await _context.Campaigns.ToListAsync();
+
+            // Seed objectives
+            var objectiveFaker = new Faker<Objective>()
+                .RuleFor(o => o.Title, f => f.Lorem.Sentence(2))
+                .RuleFor(o => o.Description, f => f.Lorem.Paragraph())
+                .RuleFor(o => o.StartDate, f => f.Date.Between(DateTime.Now.AddYears(-3), DateTime.Now))
+                .RuleFor(o => o.DueDate, (f, o) => o.StartDate.AddDays(f.Random.Int(7, 30)))
+                .RuleFor(o => o.CampaignId, f => f.PickRandom(savedCampaigns).Id)
+                .RuleFor(o => o.CreatedByManagerId, f => f.PickRandom(managerIds));
+
+            var fakeObjectives = objectiveFaker.Generate(500);
+
+            // Seed ObjectiveEmployees
+            var objectiveEmployeeFaker = new Faker<ObjectiveEmployee>()
+                .RuleFor(oe => oe.ObjectiveId, f => f.PickRandom(fakeObjectives).Id)
+                .RuleFor(oe => oe.EmployeeId, f => f.PickRandom(employeeIds))
+                .RuleFor(oe => oe.Id, f => Guid.NewGuid().ToString())
+                .RuleFor(oe => oe.Objective, (f, oe) => fakeObjectives.FirstOrDefault(o => o.Id == oe.ObjectiveId));
+
+            var fakeObjectiveEmployees = objectiveEmployeeFaker.Generate(1000); // Assume 2 employees per objective on average
+            await _context.ObjectiveEmployees.AddRangeAsync(fakeObjectiveEmployees);
+
+            // Assign objectives to employees and set statuses
+            foreach (var objEmp in fakeObjectiveEmployees)
+            {
+                if (new Random().Next(2) == 1) // 50% chance for the objective to be 'Done'
+                {
+                    objEmp.Objective.Status = ObjectiveStatus.Done; // Done
+                    objEmp.Objective.EndDate = DateTime.Now.AddDays(new Random().Next(1, 30));
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "200 fake campaigns, 500 objectives, and 1000 objective-employee links seeded successfully!",
+                CampaignCount = fakeCampaigns.Count,
+                ObjectiveCount = fakeObjectives.Count,
+                ObjectiveEmployeeCount = fakeObjectiveEmployees.Count
+            });
         }
+
+
+
 
         // Create Campaign
         [HttpPost("create")]
