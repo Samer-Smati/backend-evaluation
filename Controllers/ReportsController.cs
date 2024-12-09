@@ -141,37 +141,56 @@ public class ReportsController : ControllerBase
         var last30Days = now.AddDays(-30);
         var last12Months = now.AddMonths(-12);
 
-        var report = timeframe.ToLower() switch
+        IEnumerable<object> report;
+
+        // Determine the report based on the timeframe
+        if (timeframe.Equals("day", StringComparison.OrdinalIgnoreCase))
         {
-            "day" => campaigns
+            report = campaigns
                 .Where(c => c.CreatedDate >= last30Days) // Filter for the last 30 days
                 .GroupBy(c => c.CreatedDate.Date)
                 .Select(g => new
                 {
                     Date = g.Key,
                     Count = g.Count()
-                }),
-            "month" => campaigns
+                })
+                .OrderBy(r => r.Date) // Sort by date
+                .ToList(); // Convert to list for consistent output
+        }
+        else if (timeframe.Equals("month", StringComparison.OrdinalIgnoreCase))
+        {
+            report = campaigns
                 .Where(c => c.CreatedDate >= last12Months) // Filter for the last 12 months
                 .GroupBy(c => new { Year = c.CreatedDate.Year, Month = c.CreatedDate.Month })
                 .Select(g => new
                 {
                     Date = $"{g.Key.Year}-{g.Key.Month:00}", // Format as "YYYY-MM"
                     Count = g.Count()
-                }),
-            "year" => campaigns
+                })
+                .OrderBy(r => r.Date) // Sort by date
+                .ToList(); // Convert to list for consistent output
+        }
+        else if (timeframe.Equals("year", StringComparison.OrdinalIgnoreCase))
+        {
+            report = campaigns
                 .GroupBy(c => c.CreatedDate.Year) // No filtering, include all years
                 .Select(g => new
                 {
                     Date = g.Key,
                     Count = g.Count()
-                }),
-            _ => Enumerable.Empty<object>(),
-        };
+                })
+                .OrderBy(r => r.Date) // Sort by year
+                .ToList(); // Convert to list for consistent output
+        }
+        else
+        {
+            return BadRequest("Invalid timeframe specified. Please use 'day', 'month', or 'year'.");
+        }
 
         return Ok(report);
-
     }
+
+
 
     // Get report of tasks with average tasks per campaign
     [HttpGet("tasks-report")]
