@@ -31,7 +31,7 @@
     {
         public string FormId { get; set; }
         public string UserId { get; set; }
-        public Dictionary<string, object> FieldValues { get; set; } // Key: Field ID, Value: User's input
+        public Dictionary<string, string> FieldValues { get; set; } // Key: Field ID, Value: User's input
     }
 
 

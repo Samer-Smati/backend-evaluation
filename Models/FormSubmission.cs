@@ -14,9 +14,12 @@ namespace PfeProject.Models
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 
         [NotMapped] // Exclude this property from the database schema
-        public Dictionary<string, object> FieldValues
+        public Dictionary<string, string> FieldValues
         {
-            get => string.IsNullOrWhiteSpace(FieldValuesJson) ? new Dictionary<string, object>() : JsonConvert.DeserializeObject<Dictionary<string, object>>(FieldValuesJson);
+            get => string.IsNullOrWhiteSpace(FieldValuesJson)
+                ? new Dictionary<string, string>()
+                : JsonConvert.DeserializeObject<Dictionary<string, string>>(FieldValuesJson);
+
             set => FieldValuesJson = JsonConvert.SerializeObject(value);
         }
     }
