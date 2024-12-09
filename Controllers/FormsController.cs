@@ -213,5 +213,28 @@ namespace PfeProject.Controllers
                     }).ToList()
             };
         }
+
+        [HttpPost("submit-form")]
+        public async Task<IActionResult> SubmitForm([FromBody] FormSubmissionDto submissionDto)
+        {
+            if (submissionDto == null || submissionDto.FieldValues == null || !submissionDto.FieldValues.Any())
+                return BadRequest("Invalid form submission.");
+
+            // Create a new form submission
+            var formSubmission = new FormSubmission
+            {
+                FormId = submissionDto.FormId,
+                UserId = submissionDto.UserId,
+                SubmittedAt = DateTime.UtcNow,
+                FieldValues = submissionDto.FieldValues // This will serialize the dictionary to JSON
+            };
+
+            // Add the submission to the database
+            _context.FormSubmissions.Add(formSubmission);
+            await _context.SaveChangesAsync();
+
+            return Ok(formSubmission.Id);
+        }
+
     }
 }

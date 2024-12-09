@@ -212,7 +212,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("Campaigns");
+                    b.ToTable("Campaigns", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.CampaignManager", b =>
@@ -234,7 +234,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("CampaignManagers");
+                    b.ToTable("CampaignManagers", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.EmployeeGroup", b =>
@@ -256,7 +256,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("EmployeeGroups");
+                    b.ToTable("EmployeeGroups", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.Event", b =>
@@ -288,7 +288,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.FormConfiguration", b =>
@@ -308,7 +308,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("FormConfigurations");
+                    b.ToTable("FormConfigurations", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.FormField", b =>
@@ -348,7 +348,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("FormConfigurationId");
 
-                    b.ToTable("FormFields");
+                    b.ToTable("FormFields", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.FormFieldOption", b =>
@@ -370,7 +370,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("FormFieldId");
 
-                    b.ToTable("FormFieldOption");
+                    b.ToTable("FormFieldOption", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.Group", b =>
@@ -390,7 +390,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Groups");
+                    b.ToTable("Groups", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.Objective", b =>
@@ -432,7 +432,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("CreatedByManagerId");
 
-                    b.ToTable("Objectives");
+                    b.ToTable("Objectives", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.ObjectiveEmployee", b =>
@@ -454,7 +454,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("ObjectiveId");
 
-                    b.ToTable("ObjectiveEmployees");
+                    b.ToTable("ObjectiveEmployees", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.Report", b =>
@@ -481,7 +481,7 @@ namespace PfeProject.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("Reports");
+                    b.ToTable("Reports", (string)null);
                 });
 
             modelBuilder.Entity("PfeProject.Models.User", b =>

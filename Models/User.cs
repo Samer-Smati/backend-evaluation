@@ -6,5 +6,6 @@ namespace PfeProject.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public ICollection<FormSubmission> FormSubmissions { get; set; } = new List<FormSubmission>(); 
     }
 }

@@ -19,6 +19,7 @@ namespace PfeProject.Data
         public DbSet<FormField> FormFields { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<FormSubmission> FormSubmissions { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -26,14 +27,14 @@ namespace PfeProject.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityRole>().HasData(
+           /* builder.Entity<IdentityRole>().HasData(
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
-            );
+            );*/
             builder.Entity<Group>(entity =>
             {
-                entity.HasKey(e => e.Id);  
+                entity.HasKey(e => e.Id);
             });
             builder.Entity<Campaign>(entity =>
             {
@@ -47,33 +48,51 @@ namespace PfeProject.Data
                 .HasOne(eg => eg.Group)
                 .WithMany(g => g.EmployeeGroups)
                 .HasForeignKey(eg => eg.GroupId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<EmployeeGroup>()
                 .HasOne(eg => eg.Employee)
-                .WithMany() 
+                .WithMany()
                 .HasForeignKey(eg => eg.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<Objective>()
                 .HasKey(o => o.Id);
 
             builder.Entity<Objective>()
-                .HasOne(o => o.Campaign) 
+                .HasOne(o => o.Campaign)
                 .WithMany(c => c.Objectives)
                 .HasForeignKey(o => o.CampaignId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Objective>()
-                .HasOne(o => o.CreatedByManager) 
-                .WithMany() 
+                .HasOne(o => o.CreatedByManager)
+                .WithMany()
                 .HasForeignKey(o => o.CreatedByManagerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<FormSubmission>(entity =>
+            {
+                entity.Property(e => e.FieldValuesJson)
+                     .HasColumnType("nvarchar(max)");
+
+                // Configure relationships
+                entity.HasOne(fs => fs.Form)
+                    .WithMany()
+                    .HasForeignKey(fs => fs.FormId)
+                    .OnDelete(DeleteBehavior.Restrict); // Optional: Set up delete behavior
+
+                entity.HasOne(fs => fs.User)
+                    .WithMany(u => u.FormSubmissions)
+                    .HasForeignKey(fs => fs.UserId)
+                    .OnDelete(DeleteBehavior.Restrict); // Optional: Set up delete behavior
+            });
 
             builder.Entity<ObjectiveEmployee>()
            .HasKey(oe => oe.Id);
             builder.Entity<ObjectiveEmployee>(entity =>
             {
-                entity.HasKey(e => e.Id); 
+                entity.HasKey(e => e.Id);
             });
 
             builder.Entity<ObjectiveEmployee>()
@@ -104,10 +123,10 @@ namespace PfeProject.Data
            .HasKey(cm => cm.Id);
 
             builder.Entity<FormField>()
-                .HasMany(ff => ff.Options) 
-                .WithOne() 
-                .HasForeignKey("FormFieldId") 
-                .OnDelete(DeleteBehavior.Cascade); 
+                .HasMany(ff => ff.Options)
+                .WithOne()
+                .HasForeignKey("FormFieldId")
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<FormFieldOption>()
                 .HasKey(o => new { o.Label, o.Name });

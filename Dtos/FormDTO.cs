@@ -27,5 +27,12 @@
         public string Name { get; set; } = string.Empty;
     }
 
+    public class FormSubmissionDto
+    {
+        public string FormId { get; set; }
+        public string UserId { get; set; }
+        public Dictionary<string, object> FieldValues { get; set; } // Key: Field ID, Value: User's input
+    }
+
 
 }

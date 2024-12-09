@@ -9,5 +9,6 @@ namespace PfeProject.Models
         public string CreatedByUserId { get; set; }
         public User? CreatedByUser { get; set; }
         public ICollection<FormField> Fields { get; set; } = new List<FormField>();
+        public ICollection<FormSubmission> Submissions { get; set; } = new List<FormSubmission>();
     }
 }
