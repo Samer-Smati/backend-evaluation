@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PfeProject.Data;
 using PfeProject.Dtos;
@@ -12,10 +13,11 @@ namespace PfeProject.Controllers
     public class FormsController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public FormsController(AppDbContext context)
+        private readonly UserManager<User> _userManager;
+        public FormsController(AppDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // Create a new form
@@ -227,7 +229,7 @@ namespace PfeProject.Controllers
                 FormId = submissionDto.FormId,
                 UserId = submissionDto.UserId,
                 SubmittedAt = DateTime.UtcNow,
-                FieldValues = submissionDto.FieldValues // This will serialize the dictionary to JSON
+                FieldValues = submissionDto.FieldValues 
             };
 
             // Add the submission to the database
@@ -269,6 +271,74 @@ namespace PfeProject.Controllers
             }
 
         }
+
+        [HttpGet("manager/{managerId}/form-submissions")]
+        public async Task<IActionResult> GetFormSubmissionsByManager(string managerId)
+        {
+            // Get all forms created by the specified manager
+            var forms = await _context.FormConfigurations
+                .Where(f => f.CreatedByUserId == managerId)
+                .Include(f => f.Submissions)
+                .ThenInclude(fs => fs.User) // Include user details for submissions
+                .ToListAsync();
+
+            if (forms == null || !forms.Any())
+            {
+                return NotFound("No forms found for this manager.");
+            }
+
+            // Get the manager's details
+            var manager = await _userManager.FindByIdAsync(managerId);
+            if (manager == null)
+            {
+                return NotFound("Manager not found.");
+            }
+
+            // Collect all submissions for those forms
+            var submissions = forms.SelectMany(f => f.Submissions.Select(fs => new
+            {
+                FormId = f.Id,
+                FormName = f.Name,
+                fs.Id,
+                fs.UserId,
+                UserName = $"{fs.User.FirstName} {fs.User.LastName}", // Full name of the user
+                ManagerName = $"{manager.FirstName} {manager.LastName}", // Full name of the manager
+                fs.FieldValues,
+                fs.SubmittedAt
+            })).ToList();
+
+            return Ok(new
+            {
+                ManagerId = managerId,
+                ManagerName = $"{manager.FirstName} {manager.LastName}", // Include manager's name
+                Submissions = submissions
+            });
+        }
+
+        [HttpGet("form-submissions")]
+        public async Task<IActionResult> GetAllFormSubmissions()
+        {
+            var submissions = await _context.FormSubmissions
+                .Include(fs => fs.Form) // Include form details
+                .Include(fs => fs.User) // Include user details
+                .ToListAsync();
+
+            var result = submissions.Select(fs => new
+            {
+                fs.Id,
+                fs.FormId,
+                FormName = fs.Form.Name,
+                fs.UserId,
+                UserName = $"{fs.User.FirstName} {fs.User.LastName}", // Full name of the user
+                ManagerId = fs.Form.CreatedByUserId, // Manager who created the form
+                ManagerName = $"{_userManager.FindByIdAsync(fs.Form.CreatedByUserId)?.Result.FirstName} {_userManager.FindByIdAsync(fs.Form.CreatedByUserId)?.Result.LastName}", // Manager's name
+                fs.FieldValues,
+                fs.SubmittedAt
+            }).ToList();
+
+            return Ok(result);
+        }
+
 
     }
 }

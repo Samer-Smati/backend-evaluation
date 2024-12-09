@@ -19,13 +19,11 @@ namespace PfeProject.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public CampaignsController(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public CampaignsController(AppDbContext context, UserManager<User> userManager)
         {
             _context = context;
             _userManager = userManager;
-            _roleManager = roleManager;
         }
 
         [HttpPost("seed-fake-campaigns-and-objectives")]
