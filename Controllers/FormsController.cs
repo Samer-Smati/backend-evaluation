@@ -224,17 +224,26 @@ namespace PfeProject.Controllers
                 return BadRequest("Invalid form submission.");
 
             // Create a new form submission
+            var fieldValues = new Dictionary<string, object>();
+
+            foreach (var key in submissionDto.FieldValues.Keys)
+            {
+                // Assuming submissionDto.FieldValues contains key-value pairs like "Gender" and "Male"
+                fieldValues[key] = submissionDto.FieldValues[key];
+            }
+
+            // Create a new FormSubmission entity
             var formSubmission = new FormSubmission
             {
                 FormId = submissionDto.FormId,
                 UserId = submissionDto.UserId,
-                SubmittedAt = DateTime.UtcNow,
-                FieldValues = submissionDto.FieldValues 
+                FieldValues = fieldValues // Store key-value pairs
             };
 
             // Add the submission to the database
-            _context.FormSubmissions.Add(formSubmission);
+            await _context.FormSubmissions.AddAsync(formSubmission);
             await _context.SaveChangesAsync();
+
 
 
             try
