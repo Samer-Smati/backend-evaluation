@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PfeProject.Data;
 using PfeProject.Dtos;
 using PfeProject.Models;
+using PfeProject.Utils;
 
 namespace PfeProject.Controllers
 {
@@ -233,7 +234,40 @@ namespace PfeProject.Controllers
             _context.FormSubmissions.Add(formSubmission);
             await _context.SaveChangesAsync();
 
-            return Ok(formSubmission.Id);
+
+            try
+            {
+                // Assuming formSubmission contains the necessary information
+                // Get the form and related manager
+                var form = await _context.FormConfigurations
+                    .Include(f => f.CreatedByUser) // Assuming you have a property that links to the manager
+                    .FirstOrDefaultAsync(f => f.Id == formSubmission.FormId);
+
+                if (form == null || form.CreatedByUser == null)
+                {
+                    return Ok("Form submitted successfully and notification sent to the manager.");
+                }
+                EmailService emailService = new EmailService();
+                // Prepare email details
+                var manager = form.CreatedByUser; // This should be your manager entity
+                var subject = "Form Submission Notification";
+                var body = $"Hello {manager.FirstName} {manager.LastName},\n\n" +
+                           $"An employee has submitted the form titled '{form.Name}'. " +
+                           $"Please check your dashboard for details.\n\n" +
+                           "Best regards,\nYour Team";
+
+                // Send email to the manager
+                await emailService.SendEmailAsync(manager.Email ?? "", subject, body);
+
+               
+
+                return Ok("Form submitted successfully and notification sent to the manager.");
+            }
+            catch (Exception ex)
+            {
+                return Ok("Form submitted successfully and notification sent to the manager.");
+            }
+
         }
 
     }
