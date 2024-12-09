@@ -136,9 +136,15 @@ public class ReportsController : ControllerBase
     {
         var campaigns = await _context.Campaigns.ToListAsync();
 
+        // Calculate date thresholds
+        var now = DateTime.Now;
+        var last30Days = now.AddDays(-30);
+        var last12Months = now.AddMonths(-12);
+
         var report = timeframe.ToLower() switch
         {
             "day" => campaigns
+                .Where(c => c.CreatedDate >= last30Days) // Filter for the last 30 days
                 .GroupBy(c => c.CreatedDate.Date)
                 .Select(g => new
                 {
@@ -146,14 +152,15 @@ public class ReportsController : ControllerBase
                     Count = g.Count()
                 }),
             "month" => campaigns
+                .Where(c => c.CreatedDate >= last12Months) // Filter for the last 12 months
                 .GroupBy(c => new { Year = c.CreatedDate.Year, Month = c.CreatedDate.Month })
                 .Select(g => new
                 {
-                    Date = g.Key.Year+"-"+ g.Key.Month,
+                    Date = $"{g.Key.Year}-{g.Key.Month:00}", // Format as "YYYY-MM"
                     Count = g.Count()
                 }),
             "year" => campaigns
-                .GroupBy(c => c.CreatedDate.Year)
+                .GroupBy(c => c.CreatedDate.Year) // No filtering, include all years
                 .Select(g => new
                 {
                     Date = g.Key,
@@ -162,7 +169,8 @@ public class ReportsController : ControllerBase
             _ => Enumerable.Empty<object>(),
         };
 
-        return Ok(report); 
+        return Ok(report);
+
     }
 
     // Get report of tasks with average tasks per campaign
