@@ -27,11 +27,11 @@ namespace PfeProject.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityRole>().HasData(
+            /*builder.Entity<IdentityRole>().HasData(
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Manager", NormalizedName = "MANAGER" },
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "HR", NormalizedName = "HR" },
                 new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Employee", NormalizedName = "EMPLOYEE" }
-            );
+            );*/
             builder.Entity<Group>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -129,7 +129,7 @@ namespace PfeProject.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<FormFieldOption>()
-                .HasKey(o => new { o.Label, o.Name });
+                .HasKey(o => o.Id);
             builder.Entity<FormConfiguration>()
            .HasMany(f => f.Fields)
            .WithOne()
