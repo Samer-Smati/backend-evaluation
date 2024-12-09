@@ -51,9 +51,10 @@ namespace PfeProject.Controllers
                 .RuleFor(c => c.EndDate, (f, c) => c.StartDate.AddMonths(f.Random.Int(1, 6)))
                 .RuleFor(c => c.Type, f => f.PickRandom(new[] { "Trimestrial", "Annual", "Weekly" }))
                 .RuleFor(c => c.CreatedByUserId, f => f.PickRandom(managerIds))
-                .RuleFor(c => c.CreatedDate, f => f.Date.Between(DateTime.Now.AddYears(-3), DateTime.Now));
+                .RuleFor(c => c.CreatedDate, f => f.Date.Between(DateTime.Now.AddYears(-3), DateTime.Now)); // Allowing the same date
 
-            var fakeCampaigns = campaignFaker.Generate(200);
+            // Increase the number of campaigns to 500
+            var fakeCampaigns = campaignFaker.Generate(500);
             await _context.Campaigns.AddRangeAsync(fakeCampaigns);
             await _context.SaveChangesAsync();
 
@@ -67,9 +68,12 @@ namespace PfeProject.Controllers
                 .RuleFor(o => o.StartDate, f => f.Date.Between(DateTime.Now.AddYears(-3), DateTime.Now))
                 .RuleFor(o => o.DueDate, (f, o) => o.StartDate.AddDays(f.Random.Int(7, 30)))
                 .RuleFor(o => o.CampaignId, f => f.PickRandom(savedCampaigns).Id)
-                .RuleFor(o => o.CreatedByManagerId, f => f.PickRandom(managerIds));
+                .RuleFor(o => o.CreatedByManagerId, f => f.PickRandom(managerIds))
+                .RuleFor(o => o.Status, f => f.PickRandom(Enum.GetValues(typeof(ObjectiveStatus)).Cast<ObjectiveStatus>())); // Random status
 
             var fakeObjectives = objectiveFaker.Generate(500);
+            await _context.Objectives.AddRangeAsync(fakeObjectives);
+            await _context.SaveChangesAsync();
 
             // Seed ObjectiveEmployees
             var objectiveEmployeeFaker = new Faker<ObjectiveEmployee>()
@@ -81,13 +85,18 @@ namespace PfeProject.Controllers
             var fakeObjectiveEmployees = objectiveEmployeeFaker.Generate(1000); // Assume 2 employees per objective on average
             await _context.ObjectiveEmployees.AddRangeAsync(fakeObjectiveEmployees);
 
-            // Assign objectives to employees and set statuses
+            // Assign random statuses to objectives and set random end dates
             foreach (var objEmp in fakeObjectiveEmployees)
             {
-                if (new Random().Next(2) == 1) // 50% chance for the objective to be 'Done'
+                var randomStatus = (ObjectiveStatus)new Random().Next(0, Enum.GetNames(typeof(ObjectiveStatus)).Length);
+                objEmp.Objective.Status = randomStatus; // Random status assignment
+                if (randomStatus == ObjectiveStatus.Done)
                 {
-                    objEmp.Objective.Status = ObjectiveStatus.Done; // Done
                     objEmp.Objective.EndDate = DateTime.Now.AddDays(new Random().Next(1, 30));
+                }
+                else
+                {
+                    objEmp.Objective.EndDate = DateTime.Now.AddDays(new Random().Next(31, 90)); // Future dates for non-done statuses
                 }
             }
 
@@ -95,12 +104,13 @@ namespace PfeProject.Controllers
 
             return Ok(new
             {
-                Message = "200 fake campaigns, 500 objectives, and 1000 objective-employee links seeded successfully!",
+                Message = "500 fake campaigns, 500 objectives, and 1000 objective-employee links seeded successfully!",
                 CampaignCount = fakeCampaigns.Count,
                 ObjectiveCount = fakeObjectives.Count,
                 ObjectiveEmployeeCount = fakeObjectiveEmployees.Count
             });
         }
+
 
 
 
